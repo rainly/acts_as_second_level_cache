@@ -1,0 +1,60 @@
+= acts_as_second_level_cache
+
+Second level cache for Rails models.
+ActiveRecord 二级缓存插件
+
+== Usage
+
+=== Model
+
+  class Post < ActiveRecord::Base
+    acts_as_second_level_cache
+    
+    def self.find_posts(page,per_page = 3)
+      cache_items_with_paginate("find_posts/#{page}/#{per_page}") do
+        paginate :page => page, :per_page => 5
+      end
+    end
+    
+    def self.recents(limit = 10)
+      cache_items("recents/#{limit}") do
+        all(:order => "id desc", :limit => limit)
+      end
+    end     
+    
+    def self.last_cached
+      cache_item("last_cached") do
+        find(:first,:order => "id desc", :limit => limit)
+      end
+    end   
+  end
+  
+  class User < ActiveRecord::Base
+    has_many :posts
+  end
+  
+=== Controller
+
+  class PostsController < ApplicationController
+    def index
+      @posts = Post.find_posts(params[:page])
+      
+    end
+    
+    def show
+      @post = Post.get_cache(params[:id])
+      @post_user = User.get_cache(@post.user_id)
+      
+      @recent_posts = Post.recents(10)
+    end
+  end
+  
+== Dependencies
+  
+* Memcached
+* {cache_with_tags_store}[http://github.com/huacnlee/cache_with_tags_store]
+
+== Credits
+
+Jason Lee <huacnlee@gmail.com> - http://huacnlee.com
+  
