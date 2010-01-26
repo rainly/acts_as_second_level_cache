@@ -20,13 +20,19 @@ module ActsAsSecondLevelCache
     # 用缓存的方式查询，请手动清除
     def get_cache(id)
       if !id.blank? and (id != 0)
-        Rails.cache.fetch("models/#{self.class_name.tableize}/#{id}") {
+        item = Rails.cache.fetch("models/#{self.class_name.tableize}/#{id}") {
           begin  
             find(id)
           rescue
             nil
           end          
-        }.dup
+        }
+        
+        if item
+          item.dup
+        else
+          nil
+        end          
       else
         nil
       end
