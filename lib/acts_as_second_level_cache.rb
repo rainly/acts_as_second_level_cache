@@ -26,7 +26,7 @@ module ActsAsSecondLevelCache
           rescue
             nil
           end          
-        }
+        }.dup
       else
         nil
       end
@@ -152,6 +152,15 @@ module ActsAsSecondLevelCache
     def clear_list_cache
       # 清除集合性的缓存
       Rails.cache.delete_by_tag("#{self.class.to_s.tableize.singularize}")
+    end
+    
+    public
+    # 将 frozen 的 hash unfreeze
+    # 临时解决 Rails.cache.fetch 后 can't modify frozen hash 的错误
+    def dup
+      obj = super
+      obj.instance_variable_set('@attributes', instance_variable_get('@attributes').dup)
+      obj
     end
   end
 end
