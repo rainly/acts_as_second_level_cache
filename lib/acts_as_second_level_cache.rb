@@ -211,7 +211,7 @@ module ActsAsSecondLevelCache
   end
   
   module InstanceMethods
-    private
+    protected
     def clear_get_cache
       # 数据更改的时候清除缓存
       Rails.cache.delete("models/#{self.class.to_s.tableize}/#{self.id}")
